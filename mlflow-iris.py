@@ -36,6 +36,7 @@ with mlflow.start_run(run_name="Iris RF Experiment") as run:
 
     run_id = run.info.run_uuid
     experiment_id = run.info.experiment_id
-    mlflow.end_run()
+    
     print(mlflow.get_artifact_uri())
     print("runID: %s" % run_id)
+    mlflow.end_run()
