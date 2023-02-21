@@ -1,5 +1,7 @@
 #from mlflow.sagemaker import sagemaker_deploy, save_model
+import boto3
 from mlflow.deployments import get_deploy_client
+#from mlflow.models import build_docker, push_model_to_sagemaker
 # from mlflow.sagemaker import deploy
 
 experiment_id = "437095618945083435"
@@ -16,6 +18,11 @@ instance_type="ml.t2.medium"
 
 
 
+
+# Output the bucket names
+# print('Existing buckets:')
+# for bucket in response['Buckets']:
+#     print(f'  {bucket["Name"]}')
 # MLFLOW 2.1.1 neither support sagemakerdeploy, sagemaker_deploy, save_model FUNCTIONS
 # deploy(app_name=app_name, 
 #         model_uri=model_uri, 
@@ -56,8 +63,20 @@ config=dict(
     env={"DISABLE_NGINX": "1", "GUNICORN_CMD_ARGS": "--timeout 60"}, 
     tags={"training_timestamp": "2023-02-01T05:13:15"}
 )
-
-
+# Create Bucket
+try:
+    s3 = boto3.client('s3', region_name=region)
+    location = {'LocationConstraint': region}
+    bucket = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
+except:
+    print(f"Bucket {bucket_name} already exists")
+# Build docker
+# build_docker(name="mlflow-pyfunc")
+# # Push Model to AWS ECR
+# push_model_to_sagemaker(app_name, model_uri,
+#                         bucket=bucket_name, image_url=image_url,
+#                          region_name=region)
+# deployement
 client = get_deploy_client(f"sagemaker:/{region}")
 existing_deployments = client.list_deployments(app_name)
 if len(existing_deployments) > 0:
